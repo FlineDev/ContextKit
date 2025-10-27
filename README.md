@@ -64,6 +64,14 @@ claude
 
 ContextKit creates structured feature directories, maintains context between sessions, and guides you through quality checkpoints that prevent common AI development pitfalls.
 
+### 4. Optional: Enhanced statusline
+
+For real-time usage tracking in the statusline, install [ccusage](https://github.com/ryoppippi/ccusage):
+
+```bash
+npm install -g ccusage@latest
+```
+
 > [!NOTE]
 > **Early Development**: ContextKit is actively evolving with iterative improvements. While production-ready (I use it daily for all my projects), expect some rough edges as commands and agents are refined. ContextKit updates itself globally when you start new chats, and the `/ctxk:proj:migrate` command makes updating your project files easy - keep sending feedback to help iron out issues faster.
 
