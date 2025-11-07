@@ -1,5 +1,5 @@
 Quick planning for smaller tasks, bug fixes, and improvements (single-file workflow)
-<!-- Template Version: 4 | ContextKit: 0.2.0 | Updated: 2025-10-18 -->
+<!-- Template Version: 5 | ContextKit: 0.2.0 | Updated: 2025-11-07 -->
 
 > [!WARNING]
 > **👩‍💻 FOR DEVELOPERS**: Do not edit the content above the developer customization section - changes will be overwritten during ContextKit updates.
@@ -200,25 +200,40 @@ This command creates a condensed, single-file plan for:
 
     ✅ Created: Context/Features/[XXX]-[TaskName].md
     ✅ Understanding validated with you interactively
-    ✅ Ready to start working
+    ✅ Plan ready for your review
 
     📊 Task Scope:
     • [Number] items in scope
     • [Number] edge cases identified
     • [Number] implementation tasks
 
-    🔗 Next Steps:
-    1. Review Context/Features/[XXX]-[TaskName].md
-    2. Work through the task checklist
-    3. Optionally use Task tool with build-project agent for validation
-    4. Commit changes manually with git when done
+    ════════════════════════════════════════════════════════════════
+    🛑 PLANNING PHASE COMPLETE - AWAITING YOUR APPROVAL
+    ════════════════════════════════════════════════════════════════
 
-    💡 Tips:
-    • Check off tasks as you complete them
-    • Add notes to the Notes section as you work
-    • No need for feature branches or formal commits
-    • Keep it simple and fast!
+    The quick plan document has been created. You can now:
+
+    1️⃣ Review Context/Features/[XXX]-[TaskName].md
+    2️⃣ Make any adjustments to the plan if needed
+    3️⃣ When ready, tell me to execute/implement/go ahead
+
+    ⚠️ Implementation will NOT begin until you explicitly approve.
+
+    💡 To start implementation, say:
+    • "Go ahead and implement this"
+    • "Execute the plan"
+    • "Start working on this"
+    • Or any similar approval
+
+    ════════════════════════════════════════════════════════════════
     ```
+
+11. **STOP EXECUTION**
+    - **CRITICAL**: Do NOT proceed to implementation
+    - **CRITICAL**: Do NOT execute any tasks from the plan
+    - **CRITICAL**: Wait for explicit user approval before any implementation work
+    - The planning phase ends here
+    - Implementation requires separate user approval
 
 ---
 
