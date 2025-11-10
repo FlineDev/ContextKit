@@ -1,8 +1,8 @@
 ---
-meta: "Template Version: 6 | ContextKit: 0.2.0 | Updated: 2025-10-02"
+meta: "Template Version: 7 | ContextKit: 0.2.0 | Updated: 2024-11-05"
 name: check-modern-code
 description: [INCOMPLETE] Detect and replace outdated APIs with modern alternatives - needs rework for read-only reporting
-tools: Read, Edit, MultiEdit, Grep, Glob, Bash, Task
+tools: [Read, Edit, MultiEdit, Grep, Glob, Bash, Task]
 color: cyan
 ---
 
