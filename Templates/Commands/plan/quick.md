@@ -1,5 +1,5 @@
 Quick planning for smaller tasks, bug fixes, and improvements (single-file workflow)
-<!-- Template Version: 5 | ContextKit: 0.2.0 | Updated: 2025-11-07 -->
+<!-- Template Version: 6 | ContextKit: 0.2.0 | Updated: 2025-12-03 -->
 
 > [!WARNING]
 > **👩‍💻 FOR DEVELOPERS**: Do not edit the content above the developer customization section - changes will be overwritten during ContextKit updates.
@@ -162,8 +162,13 @@ This command creates a condensed, single-file plan for:
 
 6. **Generate Sequential Number & Create File**
    ```bash
-   # Count existing items in Context/Features/ (both folders and files)
-   NEXT_NUM=$(printf "%03d" $(($(ls -1 Context/Features/ 2>/dev/null | wc -l) + 1)))
+   # Find highest existing number in Context/Features/ (handles both files and folders with same prefix)
+   HIGHEST=$(ls -1 Context/Features/ 2>/dev/null | grep -E '^[0-9]{3}-' | sed 's/^\([0-9]\{3\}\)-.*/\1/' | sort -n | tail -1)
+   if [ -z "$HIGHEST" ]; then
+     NEXT_NUM="001"
+   else
+     NEXT_NUM=$(printf "%03d" $((10#${HIGHEST} + 1)))
+   fi
    ```
 
 7. **Generate Task Name from Description**

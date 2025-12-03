@@ -1,5 +1,5 @@
 # Create Feature Specification
-<!-- Template Version: 14 | ContextKit: 0.2.0 | Updated: 2025-10-18 -->
+<!-- Template Version: 15 | ContextKit: 0.2.0 | Updated: 2025-12-03 -->
 
 > [!WARNING]
 > **👩‍💻 FOR DEVELOPERS**: Do not edit the content above the developer customization section - changes will be overwritten during ContextKit updates.
@@ -230,8 +230,13 @@ Initialize feature specification by validating setup, confirming feature naming,
 
 8. **Generate Sequential Feature Number & Create Workspace**
    ```bash
-   # Find next sequential number by counting existing feature directories
-   NEXT_NUM=$(printf "%03d" $(($(ls -1d Context/Features/???-* 2>/dev/null | wc -l) + 1)))
+   # Find highest existing number in Context/Features/ (handles both files and folders with same prefix)
+   HIGHEST=$(ls -1 Context/Features/ 2>/dev/null | grep -E '^[0-9]{3}-' | sed 's/^\([0-9]\{3\}\)-.*/\1/' | sort -n | tail -1)
+   if [ -z "$HIGHEST" ]; then
+     NEXT_NUM="001"
+   else
+     NEXT_NUM=$(printf "%03d" $((10#${HIGHEST} + 1)))
+   fi
    NUMBERED_FEATURE_NAME="${NEXT_NUM}-[ConfirmedFeatureName]"
    mkdir -p Context/Features/${NUMBERED_FEATURE_NAME}
    echo "✅ Created feature directory: Context/Features/${NUMBERED_FEATURE_NAME}"
