@@ -1,5 +1,5 @@
 Quick planning for smaller tasks, bug fixes, and improvements (single-file workflow)
-<!-- Template Version: 6 | ContextKit: 0.2.0 | Updated: 2025-12-03 -->
+<!-- Template Version: 7 | ContextKit: 0.2.0 | Updated: 2025-12-11 -->
 
 > [!WARNING]
 > **👩‍💻 FOR DEVELOPERS**: Do not edit the content above the developer customization section - changes will be overwritten during ContextKit updates.
@@ -39,16 +39,9 @@ This command creates a condensed, single-file plan for:
    - Read everything below that line until end of file
    - Prioritize developer customizations if conflicts exist
 
-### Phase 1: Setup Validation
+### Phase 1: Capture User Intent
 
-2. **Check Project Setup**
-   - Use Glob to verify `Context.md` exists: `Glob "Context.md"`
-   - If missing: ERROR "Run /ctxk:proj:init first"
-   - Stop execution if not initialized
-
-### Phase 2: Capture User Intent
-
-3. **Get Task Description from User**
+2. **Get Task Description from User**
    - Ask user to describe the task using standardized format:
    ```
    ════════════════════════════════════════════════════════════════
@@ -69,9 +62,9 @@ This command creates a condensed, single-file plan for:
    - **CRITICAL**: Store description exactly verbatim for Quick.md Input field
    - Do NOT summarize or paraphrase
 
-### Phase 3: Codebase & Research Analysis
+### Phase 2: Codebase & Research Analysis
 
-4. **Analyze Relevant Code and Context**
+3. **Analyze Relevant Code and Context**
    - Use Grep to find relevant files and patterns:
      - Search for class/struct names mentioned in description
      - Search for function names or features mentioned
@@ -86,9 +79,9 @@ This command creates a condensed, single-file plan for:
      - Any research findings from documentation or resources
    - **Be thorough** - if the task needs ContextKit, it needs proper analysis
 
-### Phase 4: Interactive Understanding Validation
+### Phase 3: Interactive Understanding Validation
 
-5. **Present Understanding Summary to User**
+4. **Present Understanding Summary to User**
    - Display understanding summary in chat (DO NOT create file yet):
      ```
      ════════════════════════════════════════════════════════════════
@@ -158,9 +151,9 @@ This command creates a condensed, single-file plan for:
      - Ask confirmation question again
    - Continue only after user selects "Yes, proceed"
 
-### Phase 5: Generate Quick Plan File
+### Phase 4: Generate Quick Plan File
 
-6. **Generate Sequential Number & Create File**
+5. **Generate Sequential Number & Create File**
    ```bash
    # Find highest existing number in Context/Features/ (handles both files and folders with same prefix)
    HIGHEST=$(ls -1 Context/Features/ 2>/dev/null | grep -E '^[0-9]{3}-' | sed 's/^\([0-9]\{3\}\)-.*/\1/' | sort -n | tail -1)
@@ -171,18 +164,18 @@ This command creates a condensed, single-file plan for:
    fi
    ```
 
-7. **Generate Task Name from Description**
+6. **Generate Task Name from Description**
    - Parse user description for key concepts
    - Create UpperCamelCase name (e.g., "FixLoginButtonAlignment")
    - Keep concise: 2-4 words maximum
    - Focus on action and subject
 
-8. **Copy Quick Template**
+7. **Copy Quick Template**
    ```bash
    cp ~/.ContextKit/Templates/Features/Quick.md Context/Features/${NEXT_NUM}-[TaskName].md
    ```
 
-9. **Execute Quick Template Workflow**
+8. **Execute Quick Template Workflow**
    - Use Read to read the newly copied Quick.md file
    - Use Edit to populate all sections:
      - **Header**: Replace `[TaskName]` with generated name
@@ -199,7 +192,7 @@ This command creates a condensed, single-file plan for:
    - Use Edit to remove entire boxed system instructions section
    - Verify all placeholder text replaced
 
-10. **Display Success Message**
+9. **Display Success Message**
     ```
     🎉 Quick task plan created successfully!
 
@@ -233,7 +226,7 @@ This command creates a condensed, single-file plan for:
     ════════════════════════════════════════════════════════════════
     ```
 
-11. **STOP EXECUTION**
+10. **STOP EXECUTION**
     - **CRITICAL**: Do NOT proceed to implementation
     - **CRITICAL**: Do NOT execute any tasks from the plan
     - **CRITICAL**: Wait for explicit user approval before any implementation work
@@ -245,7 +238,6 @@ This command creates a condensed, single-file plan for:
 ## Validation Gates
 
 **Prerequisites:**
-- Project Context.md exists?
 - User provided task description?
 
 **Understanding Validation:**
