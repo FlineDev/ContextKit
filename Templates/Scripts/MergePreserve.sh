@@ -1,5 +1,5 @@
 #!/bin/bash
-# Template Version: 8 | ContextKit: 0.2.0 | Updated: 2025-09-16
+# Template Version: 10 | ContextKit: 0.2.0 | Updated: 2025-12-11
 
 # MergePreserve.sh - Intelligent template merging with customization preservation
 # Automatically merges template updates while preserving user customizations
@@ -10,8 +10,7 @@
 ## Purpose
 # - Merge template updates while preserving "👩‍💻 DEVELOPER CUSTOMIZATIONS" sections
 # - Handle files without customization sections (direct replacement)
-# - Detect meaningful vs boilerplate customizations for safe replacement
-# - Create backups before any modification
+# - Always preserve customization sections regardless of content
 
 set -e
 
@@ -63,26 +62,6 @@ find_customization_section() {
     grep -n "👩‍💻 DEVELOPER CUSTOMIZATIONS" "$file" 2>/dev/null | head -1 | cut -d: -f1 || echo "0"
 }
 
-has_meaningful_customizations() {
-    local file="$1"
-    local separator_line="$2"
-
-    if [ "$separator_line" -eq 0 ]; then
-        return 1  # No customization section
-    fi
-
-    # Count non-empty, non-comment lines after separator
-    local total_lines=$(wc -l < "$file")
-    local content_lines=$(tail -n +$((separator_line + 1)) "$file" | \
-        grep -v '^[[:space:]]*$' | \
-        grep -v '^[[:space:]]*<!--' | \
-        grep -v '^[[:space:]]*#' | \
-        grep -c '^' || echo "0")
-
-    # Consider meaningful if more than 3 lines of actual content
-    [ "$content_lines" -gt 3 ]
-}
-
 ###########################################
 # Merge Logic
 ###########################################
@@ -95,22 +74,14 @@ merge_with_preservation() {
 
     # If target has no customization section, direct replacement
     if [ "$target_separator" -eq 0 ]; then
-        echo "🔄 REPLACE: No customization section found"
+        echo "🔄 REPLACE: No customization section found in target"
         cp "$template" "$target"
         ensure_executable_permissions "$target"
         return 0
     fi
 
-    # Check if customizations are meaningful
-    if ! has_meaningful_customizations "$target" "$target_separator"; then
-        echo "🔄 REPLACE: Only boilerplate customizations found"
-        cp "$template" "$target"
-        ensure_executable_permissions "$target"
-        return 0
-    fi
-
-    # Preserve meaningful customizations
-    echo "🔀 MERGE: Preserving user customizations from line $target_separator"
+    # Target has customization section - always preserve it
+    echo "🔀 MERGE: Preserving customization section from line $target_separator"
 
     if [ "$template_separator" -eq 0 ]; then
         # Template has no customization section - append user customizations

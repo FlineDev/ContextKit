@@ -1,5 +1,5 @@
 # Upgrade to Latest
-<!-- Template Version: 14 | ContextKit: 0.2.0 | Updated: 2025-10-18 -->
+<!-- Template Version: 15 | ContextKit: 0.2.0 | Updated: 2025-12-11 -->
 
 > [!WARNING]
 > **👩‍💻 FOR DEVELOPERS**: Do not edit the content above the developer customization section - changes will be overwritten during ContextKit updates.
@@ -14,8 +14,7 @@ Update ContextKit templates to latest versions while preserving user customizati
 **Key Features:**
 - **Parallel Version Checking**: Uses Task tool with subagents to check all template versions simultaneously for maximum speed
 - **Smart Merge Logic**: Only processes files that actually need updates (newer template versions)
-- **Efficient Content Detection**: Skips complex merges when user customization sections contain no meaningful content
-- **Comprehensive Preservation**: Maintains all user content below "👩‍💻 DEVELOPER CUSTOMIZATIONS" sections
+- **Comprehensive Preservation**: Always maintains all user content below "👩‍💻 DEVELOPER CUSTOMIZATIONS" sections
 
 Updates both:
 - **Global project management commands** (proj/) in ~/.claude/commands/ctxk/proj/
@@ -57,7 +56,7 @@ All updates preserve user customizations in "👩‍💻 DEVELOPER CUSTOMIZATION
      - ✅ Automated file updates with customization preservation
    - **Handles both**: Global proj commands (~/.claude/commands/ctxk/proj/) AND local project templates
    - **Performance**: All previous Phase 1-3 work in ~35 seconds total
-   - **Intelligence**: Script detects boilerplate vs real customizations automatically
+   - **Intelligence**: Script always preserves customization sections regardless of content
 
 ### Phase 2: Manual LLM Processing (Complex Cases Only) - SKIP IF NO UPDATES FOUND
 
@@ -104,11 +103,7 @@ All updates preserve user customizations in "👩‍💻 DEVELOPER CUSTOMIZATION
    - If existing file:
      - Use Read tool to examine project file
      - Use Grep tool to find "👩‍💻 DEVELOPER CUSTOMIZATIONS" line number
-     - If separator found:
-       - Check if user has added actual content below separator (beyond template boilerplate)
-       - Count non-empty lines after separator that aren't just comments or template text
-       - If meaningful user content exists: Use Edit tool to merge (template above + user content below)
-       - If no meaningful user content: Use Bash tool cp to replace entirely (faster)
+     - If separator found: Use Edit tool to merge (template above + user content below)
      - If separator missing: Use Bash tool cp to replace entirely
    - If settings.json: Use intelligent merge logic (see Phase 2.1)
 
