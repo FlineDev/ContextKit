@@ -1,5 +1,5 @@
 #!/bin/bash
-# Template Version: 7 | ContextKit: 0.2.0 | Updated: 2025-12-16
+# Template Version: 12 | ContextKit: 0.2.0 | Updated: 2025-12-16
 
 # Custom Claude Code statusline:
 # Format: Chat: ████░░░░░░ 44% (87k/200k) | 5h-Usage: 61% (2.3h left)
@@ -20,8 +20,9 @@ RED='\033[31m'          # Bright red
 LIGHT_GRAY='\033[37m'   # Light gray text
 RESET='\033[0m'
 
-# Cache file location
+# Cache file locations
 WINDOW_CACHE="$HOME/.claude/statusline-window.json"
+COST_CACHE="$HOME/.claude/statusline-costs.json"
 
 # Helper function: Floor timestamp to nearest hour (UTC)
 # Input: ISO 8601 timestamp (e.g., "2025-12-16T09:45:30Z")
@@ -32,25 +33,65 @@ floor_to_hour() {
     echo "${timestamp:0:14}00:00Z"
 }
 
-# Helper function: Detect 5h window start from transcript
-# Reads transcript JSONL, finds first user message, floors to hour
-# Returns: ISO 8601 timestamp of window start
-detect_window_start() {
-    local transcript_path="$1"
+# Helper function: Detect current 5h window by traversing ALL activity chronologically
+# Handles consecutive windows (e.g., 12h of continuous work = 3 windows)
+# Algorithm:
+#   1. Collect all user message timestamps from recent transcripts
+#   2. Sort chronologically and traverse
+#   3. Track window boundaries: when activity >= window_end, new window starts
+#   4. Return the window that contains "now"
+# Returns: ISO 8601 timestamp of current window start (floored to hour)
+detect_window_start_global() {
+    local now_ts=$(date -u +%s)
+    local temp_file=$(mktemp)
 
-    if [[ ! -f "$transcript_path" ]]; then
+    # Collect ALL user message timestamps from transcripts (last 24h to catch long sessions)
+    for transcript in $(find "$HOME/.claude/projects" -name "*.jsonl" -type f -mmin -1440 2>/dev/null); do
+        # Get first user message timestamp from each transcript
+        local first_msg=$(jq -r 'select(.type == "user") | .timestamp' "$transcript" 2>/dev/null | head -1)
+
+        if [[ -n "$first_msg" && "$first_msg" != "null" ]]; then
+            # Truncate milliseconds and convert to unix timestamp
+            local clean_ts="${first_msg%.*}Z"
+            local msg_ts=$(date -u -j -f "%Y-%m-%dT%H:%M:%SZ" "$clean_ts" +%s 2>/dev/null)
+
+            if [[ -n "$msg_ts" ]]; then
+                echo "$msg_ts $first_msg" >> "$temp_file"
+            fi
+        fi
+    done
+
+    # Sort timestamps chronologically
+    sort -n "$temp_file" -o "$temp_file"
+
+    # Traverse to find current window
+    local current_window_start=""
+    local current_window_end=0
+
+    while read -r ts_unix ts_iso; do
+        if [[ -z "$current_window_start" ]]; then
+            # First activity - start first window
+            current_window_start=$(floor_to_hour "$ts_iso")
+            local start_ts=$(date -u -j -f "%Y-%m-%dT%H:%M:%SZ" "$current_window_start" +%s 2>/dev/null)
+            current_window_end=$((start_ts + 18000))  # +5 hours
+        elif [[ $ts_unix -ge $current_window_end ]]; then
+            # Activity after window ended - start new window
+            current_window_start=$(floor_to_hour "$ts_iso")
+            local start_ts=$(date -u -j -f "%Y-%m-%dT%H:%M:%SZ" "$current_window_start" +%s 2>/dev/null)
+            current_window_end=$((start_ts + 18000))  # +5 hours
+        fi
+        # else: activity within current window, no change
+    done < "$temp_file"
+
+    rm -f "$temp_file"
+
+    # Verify we're still within the detected window
+    if [[ -n "$current_window_start" && $now_ts -lt $current_window_end ]]; then
+        echo "$current_window_start"
+    else
+        # Window expired and no new activity yet - return empty
         return 1
     fi
-
-    # Find first user message timestamp
-    local first_msg=$(jq -r 'select(.type == "user") | .timestamp' "$transcript_path" 2>/dev/null | head -1)
-
-    if [[ -z "$first_msg" ]]; then
-        return 1
-    fi
-
-    # Floor to nearest hour
-    floor_to_hour "$first_msg"
 }
 
 # Helper function: Read and validate window cache
@@ -91,6 +132,72 @@ write_window_cache() {
     # Atomic write using temp file
     echo "{\"windowStart\":\"$window_start\",\"windowEnd\":\"$window_end\"}" > "$WINDOW_CACHE.tmp"
     mv "$WINDOW_CACHE.tmp" "$WINDOW_CACHE"
+}
+
+# Helper function: Initialize cost cache if missing
+initialize_cost_cache() {
+    if [[ ! -f "$COST_CACHE" ]]; then
+        echo '{"windowStart":"","sessions":{}}' > "$COST_CACHE"
+    fi
+}
+
+# Helper function: Transition to new 5h window
+# Each session's baseline becomes its previous latest value (last cost from old window)
+# This way, usage in new window = latest - baseline = only NEW spending
+# Removes sessions not updated in 30 days to keep file small
+# Args: $1=new windowStart timestamp
+transition_to_new_window() {
+    local new_window_start="$1"
+    local thirty_days_ago_ts=$(($(date -u +%s) - 2592000))  # 30 days in seconds
+
+    jq --arg ws "$new_window_start" --argjson cutoff "$thirty_days_ago_ts" '
+        .windowStart = $ws |
+        # Set baseline = latest for each session (new window, usage resets to 0)
+        .sessions |= with_entries(
+            .value.baseline = .value.latest
+        ) |
+        # Remove sessions not updated in 30 days
+        .sessions |= with_entries(
+            select(
+                (.value.updatedAt | sub("\\.[0-9]+Z$"; "Z") | fromdateiso8601) > $cutoff
+            )
+        )
+    ' "$COST_CACHE" > "$COST_CACHE.tmp" && mv "$COST_CACHE.tmp" "$COST_CACHE"
+}
+
+# Helper function: Update session cost in cache
+# - Existing sessions: baseline stays (carried from previous window), latest updates
+# - New sessions: baseline=0 (new chat, counts from start), latest=current cost
+# Args: $1=session_id, $2=current_cost
+update_session_cost() {
+    local session_id="$1"
+    local cost="$2"
+    local timestamp=$(date -u "+%Y-%m-%dT%H:%M:%SZ")
+
+    # Skip if missing data
+    if [[ -z "$session_id" || -z "$cost" || "$cost" == "null" ]]; then
+        return 0
+    fi
+
+    jq --arg sid "$session_id" --argjson cost "$cost" --arg ts "$timestamp" '
+        if .sessions[$sid] then
+            .sessions[$sid].latest = $cost |
+            .sessions[$sid].updatedAt = $ts
+        else
+            .sessions[$sid] = {
+                "baseline": 0,
+                "latest": $cost,
+                "updatedAt": $ts
+            }
+        end
+    ' "$COST_CACHE" > "$COST_CACHE.tmp" && mv "$COST_CACHE.tmp" "$COST_CACHE"
+}
+
+# Helper function: Calculate total usage within current 5h window
+# For each session: usage = latest (current cost) - baseline (cost at window start)
+# Returns sum of all session usages
+calculate_window_usage() {
+    jq '[.sessions | to_entries[] | (.value.latest - .value.baseline)] | add // 0' "$COST_CACHE"
 }
 
 # Parse command line arguments
@@ -194,40 +301,68 @@ else
     context_size_k=200
 fi
 
-# Detect 5h billing window (Phase 1: Custom implementation replacing ccusage)
-# Try to read from cache first (fast path)
+# Detect 5h billing window
+# Fast path: Use cached window if valid (not expired)
+# Slow path: Only scan ALL transcripts on first usage or when window expires
 if read_window_cache; then
-    # Cache hit! Use cached window
+    # Cache hit and window still valid - use it directly (fast path)
     total_minutes_left=$((TIME_REMAINING / 60))
 else
-    # Cache miss - detect window from transcript
-    TRANSCRIPT_PATH=$(echo "$input" | jq -r '.transcript_path // empty' 2>/dev/null)
+    # Cache miss or expired - run expensive global detection (slow path, first usage only)
+    WINDOW_START=$(detect_window_start_global)
 
-    if [[ -n "$TRANSCRIPT_PATH" ]] && [[ -f "$TRANSCRIPT_PATH" ]]; then
-        WINDOW_START=$(detect_window_start "$TRANSCRIPT_PATH")
+    if [[ -n "$WINDOW_START" ]]; then
+        # Calculate window end: start + 5 hours
+        start_ts=$(date -u -j -f "%Y-%m-%dT%H:%M:%SZ" "$WINDOW_START" +%s 2>/dev/null)
+        end_ts=$((start_ts + 18000))  # +5 hours (18000 seconds)
+        WINDOW_END=$(date -u -j -f "%s" "$end_ts" "+%Y-%m-%dT%H:%M:%SZ" 2>/dev/null)
 
-        if [[ -n "$WINDOW_START" ]]; then
-            # Calculate window end: start + 5 hours
-            start_ts=$(date -u -j -f "%Y-%m-%dT%H:%M:%SZ" "$WINDOW_START" +%s 2>/dev/null)
-            end_ts=$((start_ts + 18000))  # +5 hours (18000 seconds)
-            WINDOW_END=$(date -u -j -f "%s" "$end_ts" "+%Y-%m-%dT%H:%M:%SZ" 2>/dev/null)
+        # Write to cache (atomic)
+        write_window_cache "$WINDOW_START" "$WINDOW_END"
 
-            # Write to cache (atomic)
-            write_window_cache "$WINDOW_START" "$WINDOW_END"
+        # Calculate time remaining
+        now_ts=$(date -u +%s)
+        TIME_REMAINING=$((end_ts - now_ts))
+        total_minutes_left=$((TIME_REMAINING / 60))
+    fi
+fi
 
-            # Calculate time remaining
-            now_ts=$(date -u +%s)
-            TIME_REMAINING=$((end_ts - now_ts))
-            total_minutes_left=$((TIME_REMAINING / 60))
+# Cost tracking: Track usage WITHIN current 5h window using baseline/latest approach
+# Usage = sum of (latest - baseline) for all sessions
+if [[ -n "$WINDOW_START" ]]; then
+    initialize_cost_cache
+
+    # Check if we transitioned to a new window
+    CACHED_WINDOW_START=$(jq -r '.windowStart // ""' "$COST_CACHE" 2>/dev/null)
+    if [[ "$CACHED_WINDOW_START" != "$WINDOW_START" ]]; then
+        # New window! Set baseline = latest for all sessions (usage resets to 0)
+        transition_to_new_window "$WINDOW_START"
+    fi
+
+    # Update current session's cost (baseline stays, latest updates)
+    SESSION_ID=$(echo "$input" | jq -r '.session_id // ""' 2>/dev/null)
+    CURRENT_COST=$(echo "$input" | jq -r '.cost.total_cost_usd // 0' 2>/dev/null)
+
+    if [[ -n "$SESSION_ID" && "$CURRENT_COST" != "0" ]]; then
+        update_session_cost "$SESSION_ID" "$CURRENT_COST"
+    fi
+
+    # Calculate total usage in this window: sum of (latest - baseline)
+    WINDOW_USAGE=$(calculate_window_usage)
+
+    # Calculate usage percentage
+    if [[ -n "$WINDOW_USAGE" && -n "$BLOCK_BUDGET" ]] && [[ $(echo "$WINDOW_USAGE > 0" | bc) -eq 1 ]]; then
+        window_percent=$(echo "scale=0; ($WINDOW_USAGE * 100) / $BLOCK_BUDGET" | bc)
+        if [[ $window_percent -gt 100 ]]; then
+            window_percent=100
         fi
+    else
+        window_percent=0
     fi
 fi
 
 # Format 5h-Usage display
 if [[ -n "$WINDOW_START" && -n "$TIME_REMAINING" && $TIME_REMAINING -gt 0 ]]; then
-    # TODO Phase 2: Replace hardcoded 0% with actual cost tracking
-    window_percent=0  # Placeholder until Phase 2
-
     # Format time display: minutes if < 60, decimal hours if >= 60
     if [[ $total_minutes_left -lt 60 ]]; then
         time_display="${total_minutes_left}m left"
