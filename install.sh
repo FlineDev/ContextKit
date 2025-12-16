@@ -159,15 +159,6 @@ display_completion() {
    print_info "2. Run 'claude' to start Claude Code "
    print_info "3. Run '/ctxk:proj:init' to initialize ContextKit workflow commands in your project"
    echo
-   print_status "$YELLOW" "⚠️ IMPORTANT: Required Dependency"
-   echo
-   print_info "ContextKit's custom statusline requires ccusage for usage tracking."
-   print_info "Install it with:"
-   echo
-   print_status "$CYAN" "   npm install -g ccusage@latest"
-   echo
-   print_info "Learn more: https://github.com/ryoppippi/ccusage"
-   echo
    print_status "$GREEN" "🚀 Ready for intelligent development workflows!"
    echo
 }
