@@ -1,5 +1,5 @@
 #!/bin/bash
-# Template Version: 6 | ContextKit: 0.2.0 | Updated: 2025-12-16
+# Template Version: 7 | ContextKit: 0.2.0 | Updated: 2025-12-16
 
 # Custom Claude Code statusline:
 # Format: Chat: ████░░░░░░ 44% (87k/200k) | 5h-Usage: 61% (2.3h left)
@@ -19,6 +19,79 @@ YELLOW='\033[33m'       # Normal yellow
 RED='\033[31m'          # Bright red
 LIGHT_GRAY='\033[37m'   # Light gray text
 RESET='\033[0m'
+
+# Cache file location
+WINDOW_CACHE="$HOME/.claude/statusline-window.json"
+
+# Helper function: Floor timestamp to nearest hour (UTC)
+# Input: ISO 8601 timestamp (e.g., "2025-12-16T09:45:30Z")
+# Output: ISO 8601 timestamp floored to hour (e.g., "2025-12-16T09:00:00Z")
+floor_to_hour() {
+    local timestamp="$1"
+    # Extract date and hour, set minutes/seconds to 00
+    echo "${timestamp:0:14}00:00Z"
+}
+
+# Helper function: Detect 5h window start from transcript
+# Reads transcript JSONL, finds first user message, floors to hour
+# Returns: ISO 8601 timestamp of window start
+detect_window_start() {
+    local transcript_path="$1"
+
+    if [[ ! -f "$transcript_path" ]]; then
+        return 1
+    fi
+
+    # Find first user message timestamp
+    local first_msg=$(jq -r 'select(.type == "user") | .timestamp' "$transcript_path" 2>/dev/null | head -1)
+
+    if [[ -z "$first_msg" ]]; then
+        return 1
+    fi
+
+    # Floor to nearest hour
+    floor_to_hour "$first_msg"
+}
+
+# Helper function: Read and validate window cache
+# Returns: 0 if valid cache exists, 1 otherwise
+# Sets: WINDOW_START, WINDOW_END, TIME_REMAINING (in seconds)
+read_window_cache() {
+    if [[ ! -f "$WINDOW_CACHE" ]]; then
+        return 1
+    fi
+
+    local window_end=$(jq -r '.windowEnd' "$WINDOW_CACHE" 2>/dev/null)
+    if [[ -z "$window_end" || "$window_end" == "null" ]]; then
+        return 1
+    fi
+
+    # Check if window is still valid
+    local now_ts=$(date -u +%s)
+    local end_ts=$(date -u -j -f "%Y-%m-%dT%H:%M:%SZ" "$window_end" +%s 2>/dev/null)
+
+    if [[ -z "$end_ts" ]] || [[ $now_ts -ge $end_ts ]]; then
+        # Window expired
+        return 1
+    fi
+
+    # Valid cache - export values
+    WINDOW_START=$(jq -r '.windowStart' "$WINDOW_CACHE")
+    WINDOW_END="$window_end"
+    TIME_REMAINING=$((end_ts - now_ts))
+    return 0
+}
+
+# Helper function: Write window cache (atomic)
+# Args: $1=windowStart, $2=windowEnd
+write_window_cache() {
+    local window_start="$1"
+    local window_end="$2"
+
+    # Atomic write using temp file
+    echo "{\"windowStart\":\"$window_start\",\"windowEnd\":\"$window_end\"}" > "$WINDOW_CACHE.tmp"
+    mv "$WINDOW_CACHE.tmp" "$WINDOW_CACHE"
+}
 
 # Parse command line arguments
 PLAN=""  # No default - must be specified
@@ -121,67 +194,52 @@ else
     context_size_k=200
 fi
 
-# Check if ccusage command exists
-if ! command -v ccusage &> /dev/null; then
-    ccusage_installed="false"
-    ccusage_available="false"
+# Detect 5h billing window (Phase 1: Custom implementation replacing ccusage)
+# Try to read from cache first (fast path)
+if read_window_cache; then
+    # Cache hit! Use cached window
+    total_minutes_left=$((TIME_REMAINING / 60))
 else
-    ccusage_installed="true"
-    # Get ccusage data for 5h-Usage calculation
-    ccusage_data=$(ccusage statusline 2>/dev/null)
-    ccusage_available=$([[ $? -eq 0 && -n "$ccusage_data" ]] && echo "true" || echo "false")
+    # Cache miss - detect window from transcript
+    TRANSCRIPT_PATH=$(echo "$input" | jq -r '.transcript_path // empty' 2>/dev/null)
+
+    if [[ -n "$TRANSCRIPT_PATH" ]] && [[ -f "$TRANSCRIPT_PATH" ]]; then
+        WINDOW_START=$(detect_window_start "$TRANSCRIPT_PATH")
+
+        if [[ -n "$WINDOW_START" ]]; then
+            # Calculate window end: start + 5 hours
+            start_ts=$(date -u -j -f "%Y-%m-%dT%H:%M:%SZ" "$WINDOW_START" +%s 2>/dev/null)
+            end_ts=$((start_ts + 18000))  # +5 hours (18000 seconds)
+            WINDOW_END=$(date -u -j -f "%s" "$end_ts" "+%Y-%m-%dT%H:%M:%SZ" 2>/dev/null)
+
+            # Write to cache (atomic)
+            write_window_cache "$WINDOW_START" "$WINDOW_END"
+
+            # Calculate time remaining
+            now_ts=$(date -u +%s)
+            TIME_REMAINING=$((end_ts - now_ts))
+            total_minutes_left=$((TIME_REMAINING / 60))
+        fi
+    fi
 fi
 
-# Calculate 5h-Usage from ccusage if available
-if [[ "$ccusage_available" == "true" ]]; then
-    # Extract block time remaining (format: "block (13m left)" or "block (1h 13m left)")
-    block_time=$(echo "$ccusage_data" | grep -o 'block ([^)]*left)' | sed 's/block (\|)//g')
+# Format 5h-Usage display
+if [[ -n "$WINDOW_START" && -n "$TIME_REMAINING" && $TIME_REMAINING -gt 0 ]]; then
+    # TODO Phase 2: Replace hardcoded 0% with actual cost tracking
+    window_percent=0  # Placeholder until Phase 2
 
-    # Parse block cost from ccusage output (e.g., "$0.45 block (2h 45m left)")
-    block_cost=$(echo "$ccusage_data" | grep -o '\$[0-9.]\+ block' | grep -o '[0-9.]\+')
-
-    # Parse time remaining for display
-    if [[ "$block_time" =~ ([0-9]+)h[[:space:]]+([0-9]+)m[[:space:]]+left ]]; then
-        # Format: "1h 13m left"
-        hours_left=${BASH_REMATCH[1]}
-        minutes_left=${BASH_REMATCH[2]}
-        total_minutes_left=$((hours_left * 60 + minutes_left))
-    elif [[ "$block_time" =~ ([0-9]+)m[[:space:]]+left ]]; then
-        # Format: "13m left"
-        hours_left=0
-        minutes_left=${BASH_REMATCH[1]}
-        total_minutes_left=$minutes_left
-    fi
-
-    # Calculate cost-based percentage and format display
-    if [[ -n "$block_cost" && -n "$BLOCK_BUDGET" ]]; then
-        # Calculate real usage percentage based on API cost
-        window_percent=$(echo "scale=0; ($block_cost * 100) / $BLOCK_BUDGET" | bc)
-        if [[ $window_percent -gt 100 ]]; then window_percent=100; fi
-
-        # Format time display: minutes if < 60, decimal hours if >= 60
-        if [[ -n "$total_minutes_left" ]]; then
-            if [[ $total_minutes_left -lt 60 ]]; then
-                time_display="${total_minutes_left}m left"
-            else
-                # Convert to decimal hours with 1 decimal place
-                hours_decimal=$(echo "scale=1; $total_minutes_left / 60" | bc)
-                time_display="${hours_decimal}h left"
-            fi
-            window_info="5h-Usage: ${window_percent}% (${time_display})"
-        else
-            window_info="5h-Usage: ${window_percent}%"
-        fi
+    # Format time display: minutes if < 60, decimal hours if >= 60
+    if [[ $total_minutes_left -lt 60 ]]; then
+        time_display="${total_minutes_left}m left"
     else
-        window_info="5h-Usage: parsing..."
+        # Convert to decimal hours with 1 decimal place
+        hours_decimal=$(echo "scale=1; $total_minutes_left / 60" | bc)
+        time_display="${hours_decimal}h left"
     fi
+    window_info="5h-Usage: ${window_percent}% (${time_display})"
 else
-    # ccusage not available - distinguish between not installed vs awaiting data
-    if [[ "$ccusage_installed" == "false" ]]; then
-        window_info="5h-Usage: N/A (install ccusage)"
-    else
-        window_info="5h-Usage: N/A (awaiting usage)"
-    fi
+    # No window detected - show fallback
+    window_info="5h-Usage: N/A (awaiting usage)"
 fi
 
 # Format chat context with progress bar using built-in current_usage data
