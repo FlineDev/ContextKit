@@ -1,5 +1,5 @@
 #!/bin/bash
-# Template Version: 12 | ContextKit: 0.2.0 | Updated: 2025-12-16
+# Template Version: 13 | ContextKit: 0.2.0 | Updated: 2025-12-19
 
 # Custom Claude Code statusline:
 # Format: Chat: ████░░░░░░ 44% (87k/200k) | 5h-Usage: 61% (2.3h left)
@@ -232,13 +232,13 @@ fi
 # Set block budget based on plan
 case "$PLAN" in
     "Pro")
-        BLOCK_BUDGET="10.00"
-        ;;
-    "Max20")
-        BLOCK_BUDGET="200.00"
+        BLOCK_BUDGET="16.00"
         ;;
     "Max5")
-        BLOCK_BUDGET="50.00"
+        BLOCK_BUDGET="80.00"
+        ;;
+    "Max20")
+        BLOCK_BUDGET="320.00"
         ;;
     *)
         echo "Invalid plan: $PLAN. Use Pro, Max5, or Max20"
