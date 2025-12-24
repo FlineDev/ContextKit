@@ -1,5 +1,5 @@
 # Implementation Steps: [Feature from Tech.md]
-<!-- Template Version: 12 | ContextKit: 0.2.0 | Updated: 2025-10-17 -->
+<!-- Template Version: 13 | ContextKit: 0.2.0 | Updated: 2025-12-24 -->
 
 ## Description
 Implementation task breakdown template providing systematic S001-S999 task enumeration with parallel execution markers and dependency analysis for iOS/macOS development workflows.
@@ -45,6 +45,12 @@ Implementation task breakdown template providing systematic S001-S999 task enume
 ║    - Use `Read` tool to read current feature directory Spec.md: `Read Context/Features/[FeatureName]/Spec.md`
 ║    - Extract: user stories, functional requirements, acceptance criteria
 ║    - Map requirements to implementation tasks with research-informed constraints
+║
+║ 2.5 **Load ADR Context**
+║    - Use `Glob Context/Decisions *.md` to find existing Architecture Decision Records
+║    - If ADRs found:
+║      - Reference established patterns when creating implementation tasks
+║      - Note architectural constraints from previous decisions
 ║
 ║ 3. **Analyze Implementation Complexity and Scope**
 ║    - Count: new files, modified files, new APIs, tests needed
@@ -318,6 +324,11 @@ Implementation task breakdown template providing systematic S001-S999 task enume
   - **Dependencies**: [All implementation tasks]
   - **Notes**: Use Task tool with build-project agent to validate compilation, check warnings, and ensure dependencies resolve correctly
 
+- [ ] **S023** [P] [AI Generated: ADR compliance validation]
+  - **Path**: Verify deviations from Spec.md documented in Context/Decisions/
+  - **Dependencies**: [Implementation tasks]
+  - **Notes**: Check all significant changes have corresponding ADRs; run check-task-completion agent
+
 **🏁 MILESTONE: Automated Validation Complete**
 *Use Task tool with commit-changes agent to commit: "Complete [feature] automated testing and quality validation"*
 
@@ -526,6 +537,8 @@ For complex Xcode operations (target creation, scheme setup), use standardized f
 - [ ] Error handling and edge cases covered in task breakdown?
 - [ ] Performance requirements addressed in implementation plan?
 - [ ] Platform-specific requirements integrated throughout phases?
+- [ ] All deviations from Spec.md documented in Context/Decisions/ ADRs?
+- [ ] ADRs reference affected Spec.md sections?
 
 ### Quality Standards
 - [ ] Each task specifies exact file paths and dependencies?

@@ -1,5 +1,5 @@
 # Begin Development with Context
-<!-- Template Version: 16 | ContextKit: 0.2.0 | Updated: 2025-10-18 -->
+<!-- Template Version: 17 | ContextKit: 0.2.0 | Updated: 2025-12-24 -->
 
 > [!WARNING]
 > **👩‍💻 FOR DEVELOPERS**: Do not edit the content above the developer customization section - changes will be overwritten during ContextKit updates.
@@ -117,6 +117,13 @@ Begin systematic development with context-aware setup, task analysis, and guided
      ```
    - If workspace Context.md found: Use `Read` tool to load workspace-specific overrides
    - **CRITICAL**: This context forms the foundation for understanding how to execute all Steps.md tasks
+
+3.5 **Load ADR Context**
+   - Use `Glob Context/Decisions *.md` to find existing Architecture Decision Records
+   - If ADRs found:
+     - Display: "📋 Active ADRs: [count] decisions loaded"
+     - Load recent decisions as context for implementation
+     - Reference ADRs when implementing features that follow established patterns
 
 4. **Verify Development Environment**
    ```bash
@@ -359,6 +366,16 @@ Begin systematic development with context-aware setup, task analysis, and guided
     - Verify the checkbox update was successful before proceeding
     - **This enables session continuity**: Any new session can resume by reading Steps.md
 
+9.5 **Check for Deviations**
+    - If significant changes made to feature files:
+      - Compare implementation with Spec.md requirements
+      - If behavior differs from specification:
+        - Prompt user: "Potential deviation detected. Create ADR to document?"
+        - If user confirms:
+          - Determine next ADR number from `Glob Context/Decisions *.md`
+          - Create ADR from template in Context/Decisions/
+          - Reference ADR in subsequent commit message
+
 10. **Continue Sequential Execution - No Exit Until All Done**
     - **IMMEDIATELY after updating Steps.md**: Check for next sequential task
     - **Do NOT exit** - continue with next task in sequence according to Steps.md
@@ -414,6 +431,17 @@ Begin systematic development with context-aware setup, task analysis, and guided
       - The agent handles git analysis, formatting, and commit message generation
       - Users can also manually run /ctxk:impl:commit-changes command
 
+    - **Milestone Validation Procedure**:
+      - At 🏁 MILESTONE markers, BEFORE commit:
+        - Use Task tool to launch `check-task-completion` agent
+        - Input: Git diff since last milestone
+        - If validation FAILS:
+          - Display violations to user
+          - Options: Fix now / Create ADR and proceed / Skip (emergency only)
+        - If validation PASSES:
+          - Proceed with commit-changes agent
+          - Note validation status in commit message
+
     - **When to use run-test-* agents**:
       - When Steps.md Phase 5 tasks specify test execution
       - After implementing new test files
@@ -450,6 +478,8 @@ Begin systematic development with context-aware setup, task analysis, and guided
 - **Git Workflow**: Works within feature branch structure established by planning commands
 - **Development Hooks**: Enables PostToolUse formatting and SessionStart version checking
 - **Task Tracking**: Updates Steps.md progress tracking for systematic development workflow
+- **ADR System**: Loads existing ADRs at session start; detects deviations and prompts for ADR creation
+- **Validation Agent**: Uses `check-task-completion` agent at milestone markers before commits
 
 ## Success Messages
 

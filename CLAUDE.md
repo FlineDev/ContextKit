@@ -29,7 +29,8 @@ ContextKit/
 └── 🎯 Templates/                     # TEMPLATE DISTRIBUTION CENTER
     ├── Guidelines/                  # → GLOBAL CODING STANDARDS (copied by install.sh)
     │   ├── Swift.md                 # Swift patterns
-    │   └── SwiftUI.md               # SwiftUI patterns
+    │   ├── SwiftUI.md               # SwiftUI patterns
+    │   └── TaskCompletion.md        # Task completion criteria and ADR validation rules
     ├── Commands/                    # → CLAUDE CODE COMMANDS (get copied during /ctxk:proj:init)
     │   ├── proj/                    # Project management commands
     │   │   ├── init.md              # Project initialization
@@ -72,6 +73,8 @@ ContextKit/
     ├── Contexts/                    # → CONTEXT TEMPLATES (used by /ctxk:proj:init and /ctxk:proj:init-workspace)
     │   ├── Project.md               # Project-level Context.md with ContextKit configuration
     │   └── Workspace.md             # Workspace-level Context.md with client/company overrides
+    ├── Decisions/                   # → ARCHITECTURE DECISIONS (Context/Decisions/ created during /ctxk:proj:init)
+    │   └── ADR.md                   # Architecture Decision Record template
     ├── Backlog/                     # → BACKLOG TEMPLATES (used by /ctxk:bckl:add-idea and /ctxk:bckl:add-bug)
     │   ├── Ideas-Inbox.md           # New idea capture template with evaluation framework
     │   ├── Ideas-Backlog.md         # Prioritized idea backlog template with strategic organization
@@ -392,6 +395,7 @@ AGENT_LATEST_VERSION=$(sed -n '2p' ~/.ContextKit/Templates/Agents/check-modern-c
 - `build-project.md` - Execute builds, filter developer comments, report errors/warnings
 - `run-test-suite.md` - Execute complete test suite with build validation and structured failure reporting
 - `run-specific-test.md` - Execute specific test with build validation and focused failure analysis
+- `check-task-completion.md` - Validate task completion against ADRs and Spec
 
 **Incomplete Agents** (need rework for read-only reporting):
 - `check-accessibility.md` - VoiceOver labels, color contrast, dynamic type validation
@@ -764,6 +768,29 @@ Before committing template changes:
 - [ ] YAML frontmatter correct (for agents)
 - [ ] No unnecessary variable substitution added
 - [ ] Testing workflow completed successfully
+
+---
+
+## 🎯 ADR Integration System
+
+The repository includes a complete ADR (Architecture Decision Record) system for tracking deviations from planned specifications and managing architectural decisions:
+
+### Components
+- **Templates/Decisions/ADR.md** - Template for documenting architectural decisions and deviations
+- **Templates/Agents/check-task-completion.md** - Agent that validates task completion against ADRs
+- **Templates/Guidelines/TaskCompletion.md** - Validation criteria for task completion
+
+### Integration Points
+- **Context/Decisions/** directory created during `/ctxk:proj:init`
+- **start-working.md** loads ADRs at development session start
+- **Milestone validation** uses check-task-completion agent to verify ADR compliance
+- Deviations from Spec.md automatically trigger ADR creation prompts
+
+### Usage Pattern
+1. During planning (Spec/Tech/Steps): Decisions are documented
+2. During implementation (start-working): ADRs are loaded as context
+3. At milestones: check-task-completion validates against planning
+4. Deviations create ADRs for team visibility and future reference
 
 ---
 

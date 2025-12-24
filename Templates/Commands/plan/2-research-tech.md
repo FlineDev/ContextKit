@@ -1,5 +1,5 @@
 # Technical Planning: Research & Architecture
-<!-- Template Version: 16 | ContextKit: 0.2.0 | Updated: 2025-10-18 -->
+<!-- Template Version: 17 | ContextKit: 0.2.0 | Updated: 2025-12-24 -->
 
 > [!WARNING]
 > **👩‍💻 FOR DEVELOPERS**: Do not edit the content above the developer customization section - changes will be overwritten during ContextKit updates.
@@ -40,6 +40,14 @@
      Technical planning requires completed specification as input.
      ```
      → END (exit with error)
+
+2.5 **Load ADR Context**
+    - Use `Glob Context/Decisions *.md` to find existing Architecture Decision Records
+    - If ADRs found:
+      - Understand architectural decisions already made
+      - Identify constraints from previous choices
+      - Technical choices in Tech.md must align with or explicitly supersede existing ADRs
+      - Reference relevant ADRs in architecture section
 
 ### Phase 2: Template Execution
 
@@ -142,6 +150,7 @@
 - **Team Collaboration**: Creates committed technical plan for team review and development guidance
 - **Git Integration**: Works within existing feature branch for systematic development workflow
 - **Workspace Integration**: Template inherits coding standards and constitutional overrides from workspace Context.md
+- **ADR System**: Loads existing ADRs to understand architectural constraints; technical choices must align with or supersede existing ADRs
 
 ## Success Messages
 

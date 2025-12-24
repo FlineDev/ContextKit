@@ -1,5 +1,5 @@
 # Release App to App Store
-<!-- Template Version: 3 | ContextKit: 0.2.0 | Updated: 2025-10-18 -->
+<!-- Template Version: 4 | ContextKit: 0.2.0 | Updated: 2025-12-24 -->
 
 > [!WARNING]
 > **👩‍💻 FOR DEVELOPERS**: Do not edit the content above the developer customization section - changes will be overwritten during ContextKit updates.
@@ -29,6 +29,11 @@ Execute iOS/macOS app release workflow with constitutional compliance validation
    - Use `Bash` to check git status: `git status --porcelain`
    - If uncommitted changes: ERROR "Commit all changes before release using /ctxk:impl:commit-changes" → EXIT
    - Use `Read` to verify `Context.md` exists: If missing, ERROR "Run /ctxk:proj:init to set up ContextKit first" → EXIT
+
+1.5 **Check ADR Compliance (Optional)**
+    - Use `Glob Context/Decisions *.md` to find ADRs
+    - If ADRs found: Review for any unresolved or blocking decisions
+    - If critical ADRs pending: WARN user "Unresolved ADRs found - review before release"
 
 ### Phase 2: Change Analysis and Version Planning
 2. **Analyze all changes since last release**

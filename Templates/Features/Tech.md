@@ -1,5 +1,5 @@
 # Technical Planning: [Feature from Spec.md]
-<!-- Template Version: 7 | ContextKit: 0.2.0 | Updated: 2025-10-17 -->
+<!-- Template Version: 8 | ContextKit: 0.2.0 | Updated: 2025-12-24 -->
 
 ## Description
 Technical planning template combining research and architecture phases into single workflow. Executes systematic knowledge acquisition followed by technical architecture design in one continuous flow.
@@ -21,6 +21,13 @@ Technical planning template combining research and architecture phases into sing
 ║    - Use `Read` tool to read project Context.md: `Read Context.md`
 ║    - Extract: current tech stack, existing dependencies, architecture patterns
 ║    - For workspace projects: Use `Read` tool on workspace Context.md for tech preferences
+║
+║ 2.5 **Check Alignment with Existing ADRs**
+║     - Use `Glob Context/Decisions *.md` to find existing decisions
+║     - If ADRs found:
+║       - Verify proposed architecture aligns with existing ADRs
+║       - If conflict found: Document in Architecture section as deviation candidate
+║       - Reference relevant ADRs in technical decisions
 ║
 ║ 3. **Identify Research Targets**
 ║    - Scan specification for mentioned technologies (frameworks, libraries, APIs)
