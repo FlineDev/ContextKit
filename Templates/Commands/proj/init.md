@@ -224,7 +224,7 @@ Initialize current project with ContextKit development workflow system. Sets up 
 
 11. **Create Directory Structure**
    ```bash
-   mkdir -p .claude/commands/ctxk .claude/agents/ctxk Context/Features Context/Backlog Context/Scripts
+   mkdir -p .claude/commands/ctxk .claude/agents/ctxk Context/Features Context/Backlog Context/Scripts Context/Decisions
    ```
 
 12. **Copy Workflow Command Templates (Local Only)**
@@ -495,6 +495,7 @@ Initialize current project with ContextKit development workflow system. Sets up 
    ✓ Context.md - Comprehensive project analysis with validated build/test commands
    ✓ Context/Features/ - Systematic feature development
    ✓ Context/Backlog/ - Ideas and bugs with evaluation frameworks
+   ✓ Context/Decisions/ - Architecture Decision Records (ADRs)
    ✓ Context/Guidelines/ - Development standards relevant to project type
    ✓ Context/Scripts/ - Code formatting and status automation
    ✓ .claude/commands/ctxk/ - Workflow commands (plan/, impl/, bckl/) - global proj/ commands remain global

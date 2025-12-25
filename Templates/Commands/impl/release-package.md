@@ -1,5 +1,5 @@
 # Release Swift Package
-<!-- Template Version: 3 | ContextKit: 0.2.0 | Updated: 2025-10-18 -->
+<!-- Template Version: 4 | ContextKit: 0.2.0 | Updated: 2025-12-24 -->
 
 > [!WARNING]
 > **👩‍💻 FOR DEVELOPERS**: Do not edit the content above the developer customization section - changes will be overwritten during ContextKit updates.
@@ -51,6 +51,11 @@ Execute Swift Package release workflow with version management, release notes ge
    gh auth status || echo "❌ GitHub CLI not authenticated"
    ```
    - If not authenticated: ERROR "Run 'gh auth login' to authenticate with GitHub."
+
+4.5 **Check ADR Compliance (Optional)**
+    - Use `Glob Context/Decisions *.md` to find ADRs
+    - If ADRs found: Review for any unresolved or blocking decisions
+    - If critical ADRs pending: WARN user "Unresolved ADRs found - review before release"
 
 ### Phase 2: Version Management
 

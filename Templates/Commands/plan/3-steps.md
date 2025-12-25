@@ -1,5 +1,5 @@
 # Create Task List
-<!-- Template Version: 7 | ContextKit: 0.2.0 | Updated: 2025-10-18 -->
+<!-- Template Version: 8 | ContextKit: 0.2.0 | Updated: 2025-12-24 -->
 
 > [!WARNING]
 > **👩‍💻 FOR DEVELOPERS**: Do not edit the content above the developer customization section - changes will be overwritten during ContextKit updates.
@@ -46,6 +46,13 @@ Generate implementation task breakdown by detecting current feature, validating 
      ```
      → END (exit with error)
 
+2.5 **Load ADR Context**
+    - Use `Glob Context/Decisions *.md` to find existing Architecture Decision Records
+    - If ADRs found:
+      - Understand patterns established in previous features
+      - Reference ADRs when creating tasks that follow established patterns
+      - If feature will deviate from Spec.md or establish new patterns, include ADR creation task
+
 ### Phase 2: Template Setup & Execution
 
 3. **Copy Steps Template**
@@ -61,6 +68,9 @@ Generate implementation task breakdown by detecting current feature, validating 
    - Use tools (`Read`, `Edit`) as directed by the template instructions
    - **Template execution**: The copied Steps.md handles all task breakdown, dependency analysis, and parallel execution planning
    - **Progress tracking**: User can see checkboxes being completed in the copied file
+   - **ADR Integration**: When generating validation tasks, include:
+     - ADR review task: Verify all deviations from Spec.md documented in ADRs
+     - Task completion validation: Include check-task-completion agent at milestones
 
 5. **Extract and Resolve Clarification Points Interactively**
    - Use `Grep` tool to find clarification markers in Steps.md: `Grep "🚨 \\[NEEDS CLARIFICATION:" [numbered-feature-directory]/Steps.md`
@@ -122,6 +132,8 @@ Generate implementation task breakdown by detecting current feature, validating 
 - **Team Collaboration**: Creates committed implementation plan for team review and development coordination
 - **Git Integration**: Works within existing feature branch for systematic development workflow
 - **Workspace Integration**: Template inherits coding standards and constitutional overrides from workspace Context.md
+- **ADR System**: Loads existing ADRs to inform task generation; includes ADR creation tasks when patterns established
+- **Validation Agent**: Integrates check-task-completion agent at milestone markers
 
 ## Success Messages
 

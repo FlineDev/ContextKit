@@ -1,5 +1,5 @@
 # Project Context Template
-<!-- Template Version: 3 | ContextKit: 0.2.0 | Updated: 2025-10-02 -->
+<!-- Template Version: 4 | ContextKit: 0.2.0 | Updated: 2025-12-24 -->
 
 ## Description
 Project-level Context.md template providing project-specific investigation, development commands, project structure analysis, and ContextKit workflow configuration.
@@ -181,6 +181,14 @@ Project-level Context.md template providing project-specific investigation, deve
 
 **Formatters** (configured):
 [Formatter configurations found and their settings]
+
+## ContextKit Directories
+
+- **Context/Features/** - Feature specifications, technical plans, and implementation steps
+- **Context/Backlog/** - Ideas and bugs with evaluation frameworks
+- **Context/Decisions/** - Architecture Decision Records tracking deviations and strategic decisions
+- **Context/Guidelines/** - Development standards relevant to project type
+- **Context/Scripts/** - Code formatting and status automation
 
 ## Development Guidelines
 

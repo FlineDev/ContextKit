@@ -1,5 +1,5 @@
 # Create Feature Specification
-<!-- Template Version: 15 | ContextKit: 0.2.0 | Updated: 2025-12-03 -->
+<!-- Template Version: 16 | ContextKit: 0.2.0 | Updated: 2025-12-24 -->
 
 > [!WARNING]
 > **👩‍💻 FOR DEVELOPERS**: Do not edit the content above the developer customization section - changes will be overwritten during ContextKit updates.
@@ -228,6 +228,17 @@ Initialize feature specification by validating setup, confirming feature naming,
 
 ### Phase 3: Template Setup & Execution
 
+7.5 **Load ADR Context for Specification**
+    - Create Context/Decisions/ directory if not exists:
+      ```bash
+      mkdir -p Context/Decisions
+      ```
+    - Use `Glob Context/Decisions *.md` to find existing decisions
+    - If ADRs found:
+      - Review relevant ADRs that might affect new feature requirements
+      - Reference established patterns when creating specification
+      - If requirements conflict with existing ADRs, note for later ADR creation
+
 8. **Generate Sequential Feature Number & Create Workspace**
    ```bash
    # Find highest existing number in Context/Features/ (handles both files and folders with same prefix)
@@ -349,6 +360,7 @@ Initialize feature specification by validating setup, confirming feature naming,
 - **Team Collaboration**: Creates committed specification for team review and stakeholder validation
 - **Git Integration**: Establishes feature branch for systematic development workflow
 - **Workspace Integration**: Template inherits coding standards and constitutional overrides from workspace Context.md
+- **ADR System**: Creates Context/Decisions/ directory; loads existing ADRs to inform specification
 
 ## Success Messages
 

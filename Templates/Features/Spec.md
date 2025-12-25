@@ -1,5 +1,5 @@
 # Feature Specification Template
-<!-- Template Version: 6 | ContextKit: 0.2.0 | Updated: 2025-10-17 -->
+<!-- Template Version: 7 | ContextKit: 0.2.0 | Updated: 2025-12-24 -->
 
 ## Description
 Feature specification template providing systematic business requirements generation with progress tracking and quality validation.
@@ -24,6 +24,13 @@ Feature specification template providing systematic business requirements genera
 ║      - Extract framework preferences, architectural patterns, API choices
 ║    - For workspace projects: Use `Read` tool on workspace Context.md for additional standards
 ║    - Document all loaded guidelines for comprehensive development pattern application
+║
+║ 2.5 **Load Existing Architectural Decisions**
+║     - Use `Glob Context/Decisions *.md` to find existing ADRs
+║     - If ADRs found:
+║       - Review decisions that might impact this feature
+║       - Note if feature aligns with or challenges existing decisions
+║       - Reference relevant ADRs in specification if applicable
 ║
 ║ 3. **Extract User Requirements from Original Input**
 ║    - Parse original feature description provided by user

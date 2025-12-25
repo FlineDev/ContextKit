@@ -1,5 +1,5 @@
 # Commit Changes
-<!-- Template Version: 10 | ContextKit: 0.2.0 | Updated: 2025-10-02 -->
+<!-- Template Version: 11 | ContextKit: 0.2.0 | Updated: 2025-12-24 -->
 
 > [!WARNING]
 > **👩‍💻 FOR DEVELOPERS**: Do not edit the content above the developer customization section - changes will be overwritten during ContextKit updates.
@@ -51,6 +51,7 @@ Delegate to specialized commit-changes agent for intelligent git analysis, commi
 - **Quality Agents**: Works with other ContextKit agents for comprehensive development workflow
 - **Project Setup**: Requires `/ctxk:proj:init` to install the commit-changes agent
 - **Git Workflow**: Integrates with feature branch development and task completion
+- **ADR System**: Commit message may reference ADR numbers when changes involve documented decisions
 
 ════════════════════════════════════════════════════════════════════════════════
 👩‍💻 DEVELOPER CUSTOMIZATIONS - EDITABLE SECTION
