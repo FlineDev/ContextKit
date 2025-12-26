@@ -1,5 +1,5 @@
 #!/bin/bash
-# Template Version: 13 | ContextKit: 0.2.0 | Updated: 2025-12-19
+# Template Version: 16 | ContextKit: 0.2.0 | Updated: 2025-12-26
 
 # Custom Claude Code statusline:
 # Format: Chat: ████░░░░░░ 44% (87k/200k) | 5h-Usage: 61% (2.3h left)
@@ -168,6 +168,10 @@ transition_to_new_window() {
 # Helper function: Update session cost in cache
 # - Existing sessions: baseline stays (carried from previous window), latest updates
 # - New sessions: baseline=0 (new chat, counts from start), latest=current cost
+# - Reset detection: if cost < baseline, the session's cost counter was reset
+#   This happens when: resuming old sessions, /compact, or auto-compact at 95% context
+#   See: https://github.com/anthropics/claude-code/issues/13088
+#   When detected, we reset baseline=0 to count new spending from the reset point
 # Args: $1=session_id, $2=current_cost
 update_session_cost() {
     local session_id="$1"
@@ -181,8 +185,15 @@ update_session_cost() {
 
     jq --arg sid "$session_id" --argjson cost "$cost" --arg ts "$timestamp" '
         if .sessions[$sid] then
-            .sessions[$sid].latest = $cost |
-            .sessions[$sid].updatedAt = $ts
+            # Check if session was reset (cost decreased) - reset baseline to 0
+            if $cost < .sessions[$sid].baseline then
+                .sessions[$sid].baseline = 0 |
+                .sessions[$sid].latest = $cost |
+                .sessions[$sid].updatedAt = $ts
+            else
+                .sessions[$sid].latest = $cost |
+                .sessions[$sid].updatedAt = $ts
+            end
         else
             .sessions[$sid] = {
                 "baseline": 0,
@@ -194,10 +205,12 @@ update_session_cost() {
 }
 
 # Helper function: Calculate total usage within current 5h window
-# For each session: usage = latest (current cost) - baseline (cost at window start)
+# For each session: usage = latest - baseline (spending in this window only)
+# Uses max(0, ...) as safety net for any cached sessions with stale baseline > latest
+# (update_session_cost now resets baseline when this is detected, but old cache entries may exist)
 # Returns sum of all session usages
 calculate_window_usage() {
-    jq '[.sessions | to_entries[] | (.value.latest - .value.baseline)] | add // 0' "$COST_CACHE"
+    jq '[.sessions | to_entries[] | [(.value.latest - .value.baseline), 0] | max] | add // 0' "$COST_CACHE"
 }
 
 # Parse command line arguments
@@ -328,7 +341,16 @@ else
 fi
 
 # Cost tracking: Track usage WITHIN current 5h window using baseline/latest approach
-# Usage = sum of (latest - baseline) for all sessions
+#
+# How it works:
+#   - For each session, we store: baseline (cost at window start) and latest (current cost)
+#   - Session's usage in this window = latest - baseline
+#   - Total 5h usage = sum of all session usages
+#
+# Known limitation we work around:
+#   Claude Code's cost.total_cost_usd resets when sessions are resumed or compacted
+#   (see https://github.com/anthropics/claude-code/issues/13088)
+#   When we detect cost < baseline, we reset baseline=0 to avoid negative usage values
 if [[ -n "$WINDOW_START" ]]; then
     initialize_cost_cache
 
