@@ -1,5 +1,5 @@
 # Initialize Project with ContextKit
-<!-- Template Version: 11 | ContextKit: 0.2.0 | Updated: 2025-10-18 -->
+<!-- Template Version: 12 | ContextKit: 0.2.0 | Updated: 2025-12-26 -->
 
 > [!WARNING]
 > **👩‍💻 FOR DEVELOPERS**: Do not edit the content above the developer customization section - changes will be overwritten during ContextKit updates.
@@ -114,7 +114,7 @@ Initialize current project with ContextKit development workflow system. Sets up 
        {
          "questions": [
            {
-             "question": "Set to ContextKit statusline with real-time monitoring? (Current: [current/none detected]. Provides: '5h-Usage: 73% (1.4h left) | Chat: ▓▓▓▓▓▓░░░░ 64% (128k/200k)' with colored progress bars for context awareness.)",
+             "question": "Set to ContextKit statusline with real-time monitoring? (Current: [current/none detected]. Provides: 'Chat: ▓▓▓▓▓▓░░░░ 64% (128k/200k) | 5h-Usage: 73% (1.4h left)' with colored progress bars for context awareness.)",
              "header": "Status Line",
              "options": [
                {
