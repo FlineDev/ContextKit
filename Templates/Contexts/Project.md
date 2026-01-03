@@ -1,5 +1,5 @@
 # Project Context Template
-<!-- Template Version: 3 | ContextKit: 0.2.0 | Updated: 2025-10-02 -->
+<!-- Template Version: 4 | ContextKit: 0.2.0 | Updated: 2026-01-03 -->
 
 ## Description
 Project-level Context.md template providing project-specific investigation, development commands, project structure analysis, and ContextKit workflow configuration.
@@ -69,10 +69,13 @@ Project-level Context.md template providing project-specific investigation, deve
 ║      B) Component Architecture (hierarchical component map)
 ║      C) Detailed Component Sections (one per component with build/test commands)
 ║      D) Development Workflow (ContextKit integration)
-║      E) Constitutional Principles (applied with workspace inheritance)
+║      E) Development Guidelines (with @ mentions for each copied guideline)
+║      F) Constitutional Principles (applied with workspace inheritance)
 ║    - **CRITICAL**: All information must be based on init.md findings, not assumptions
 ║    - Include validated build/test commands for each component
 ║    - Document actual file structures and dependencies found
+║    - **CRITICAL**: Add @ mention for EACH guideline that was copied to Context/Guidelines/
+║      (Use Glob to check which .md files exist in Context/Guidelines/ and @ mention each)
 ║
 ║ 7. **Final Validation**
 ║    - Verify all information is based on actual init.md investigation results
@@ -92,6 +95,7 @@ Project-level Context.md template providing project-specific investigation, deve
 ║ - All information based on actual init.md investigation findings, not assumptions
 ║ - Component relationships and dependencies clearly mapped
 ║ - File structure documented for each component
+║ - @ mentions added for ALL guidelines copied to Context/Guidelines/ (verified with Glob)
 ║ - Constitutional principles applied with workspace inheritance documented
 ║ - System instructions completely removed from final Context.md
 ║
@@ -184,15 +188,18 @@ Project-level Context.md template providing project-specific investigation, deve
 
 ## Development Guidelines
 
-**Applied Guidelines**: [List guidelines copied during project setup]
-- Guidelines automatically loaded by all planning commands (`/ctxk:plan:*`)
-- Implementation commands apply guideline standards during development
-- Quality agents validate against guideline requirements
+**Applied Guidelines**: [List guideline names that were copied, e.g., "Swift, SwiftUI"]
+
+[For each guideline that was copied during setup, add @ mention on separate line:]
+[If Swift.md was copied: @Context/Guidelines/Swift.md]
+[If SwiftUI.md was copied: @Context/Guidelines/SwiftUI.md]
+[Add other guidelines as applicable]
 
 **Guidelines Integration**:
-- All planning phases reference active guidelines for architecture decisions
+- Guidelines automatically loaded in full at chat start via @ mentions above
+- All planning phases reference guidelines for architecture decisions
 - Implementation phases apply guideline patterns and API preferences
-- Migration only updates guidelines that exist in project
+- Quality agents validate against guideline requirements
 
 ## Constitutional Principles
 

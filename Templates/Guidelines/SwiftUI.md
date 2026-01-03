@@ -1,5 +1,5 @@
 # SwiftUI Development Guidelines
-<!-- Template Version: 11 | ContextKit: 0.2.0 | Updated: 2025-09-17 -->
+<!-- Template Version: 12 | ContextKit: 0.2.0 | Updated: 2026-01-03 -->
 
 > [!WARNING]
 > **👩‍💻 FOR DEVELOPERS**: Do not edit the content above the developer customization section - changes will be overwritten during ContextKit updates.
@@ -34,6 +34,17 @@ These guidelines provide strategic direction for SwiftUI development in ContextK
 
 ---
 
+## Liquid Glass Design Language (iOS 26+)
+
+Liquid Glass is Apple's translucent material design system introduced across all platforms in iOS 26+ (WWDC 2025).
+
+**API Usage:**
+- ✅ **`.glassEffect()`**: Apply Liquid Glass material to custom views (defaults to capsule shape)
+- ✅ **Automatic adoption**: System controls automatically use Liquid Glass when compiled with Xcode 26
+- ❌ **Avoid**: Overusing glass effects on content-heavy views (can reduce readability)
+
+---
+
 ## Modern SwiftUI Patterns
 
 ### View Organization Preferences
@@ -55,8 +66,31 @@ These guidelines provide strategic direction for SwiftUI development in ContextK
 - ❌ **Avoid**: `print()` statements for logging
 
 ### Button and Interaction Patterns
-- ✅ **Trailing closure syntax**: `Button { action } label: { CustomView() }`
-- ✅ **Built-in initializers**: `Button("Save", systemImage: "checkmark") { }` over `Button { } label: { Label("Save", systemImage: "checkmark") }`
+
+**CRITICAL: Use Built-in Initializers for SF Symbols**
+
+When creating buttons with text and SF Symbols, ALWAYS use the direct `systemImage:` parameter:
+
+```swift
+// ✅ CORRECT - Use built-in initializer
+Button("Save", systemImage: "checkmark") { }
+
+// ❌ WRONG - Don't manually create Label inside button
+Button { } label: { Label("Save", systemImage: "checkmark") }
+```
+
+**Why this matters:**
+- Simpler and more concise code
+- Creates Label internally with proper accessibility
+- Better adaptation in toolbars, menus, and containers
+- Official Apple-documented pattern
+
+**This applies to many SwiftUI views:**
+- `Button`, `NavigationLink`, `Toggle`, `Picker`, and others support direct `systemImage:` parameters
+- Always check if a view has a `systemImage:` initializer before manually creating `Label`
+
+**Other Button Patterns:**
+- ✅ **Trailing closure syntax**: `Button { action } label: { CustomView() }` for custom views
 - ✅ **Text selection**: Enable for error messages and important content
 - ✅ **Accessibility labels**: For all interactive elements
 - ❌ **Avoid**: `action:` parameter style for buttons

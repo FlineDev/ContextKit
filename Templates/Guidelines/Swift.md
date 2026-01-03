@@ -1,5 +1,5 @@
 # Swift Development Guidelines
-<!-- Template Version: 4 | ContextKit: 0.2.0 | Updated: 2025-09-26 -->
+<!-- Template Version: 5 | ContextKit: 0.2.0 | Updated: 2026-01-03 -->
 
 > [!WARNING]
 > **👩‍💻 FOR DEVELOPERS**: Do not edit the content above the developer customization section - changes will be overwritten during ContextKit updates.
@@ -173,6 +173,30 @@ Quality validation is handled by specialized agents:
 - **`check-localization`**: Verifies string externalization
 - **`check-error-handling`**: Confirms ErrorKit patterns
 - **`check-code-debt`**: Removes AI artifacts and cleans up code
+
+---
+
+## Apple Platform Versioning
+
+### Unified Version Numbering (2025+)
+
+Starting with releases in September 2025, Apple unified version numbering across **all platforms**:
+
+**Year-Aligned Versioning Scheme:**
+- **WWDC 2025** (June 9, 2025) → **Version 26** releases (September 15, 2025)
+- Version number = WWDC year + 1
+- All platforms share the same major version number
+
+**Platform Version Alignment:**
+```
+Previous Scheme (2024):          Unified Scheme (2025+):
+├─ iOS 18.x                     ├─ iOS 26.x
+├─ iPadOS 18.x                  ├─ iPadOS 26.x
+├─ macOS 15.x (Sequoia)         ├─ macOS 26.x (Tahoe)
+├─ watchOS 11.x                 ├─ watchOS 26.x
+├─ tvOS 18.x                    ├─ tvOS 26.x
+└─ visionOS 2.x                 └─ visionOS 26.x
+```
 
 ---
 
